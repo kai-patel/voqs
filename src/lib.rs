@@ -60,8 +60,13 @@ impl State {
         }
     }
 
-    fn resize(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
-        unimplemented!();
+    pub fn resize(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
+        if new_size.width > 0 && new_size.height > 0 {
+            self.size = new_size;
+            self.config.width = new_size.width;
+            self.config.height = new_size.height;
+            self.surface.configure(&self.device, &self.config);
+        }
     }
 
     fn input(&mut self, event: &WindowEvent) -> bool {
@@ -77,13 +82,15 @@ impl State {
     }
 }
 
-pub fn run() {
+pub async fn run() {
     env_logger::init();
 
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new()
         .build(&event_loop)
         .expect("Expected to create window");
+
+    let mut state = State::new(&window).await;
 
     event_loop.run(move |event, _, control_flow| match event {
         Event::WindowEvent {
@@ -100,6 +107,12 @@ pub fn run() {
                     },
                 ..
             } => *control_flow = ControlFlow::Exit,
+            WindowEvent::Resized(physical_size) => {
+                state.resize(*physical_size);
+            }
+            WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
+                state.resize(**new_inner_size);
+            }
             _ => {}
         },
         _ => {}
