@@ -8,6 +8,7 @@ use winit::{
     window::{Window, WindowBuilder},
 };
 
+mod engine;
 mod texture;
 
 const NUM_INSTANCES_PER_ROW: u32 = 10;
@@ -551,4 +552,8 @@ pub async fn run() {
         }
         _ => {}
     });
+}
+
+pub fn gen_buffers(buffers: u32) -> Vec<wgpu::Buffer> {
+    todo!();
 }
